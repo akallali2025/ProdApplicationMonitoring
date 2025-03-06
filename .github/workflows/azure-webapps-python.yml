@@ -82,7 +82,8 @@ jobs:
         with:
           name: python-app
           path: .
-          
+
+      - run: az login
       - name: Login to Azure
         uses: azure/login@v2
         with:
