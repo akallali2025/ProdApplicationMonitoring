@@ -20,8 +20,8 @@
 name: Build and deploy Python app to Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: your-app-name  # set this to the name of your Azure Web App
-  PYTHON_VERSION: '3.8'              # set this to the Python version to use
+  AZURE_WEBAPP_NAME: monitoring-prod-apps  # set this to the name of your Azure Web App
+  PYTHON_VERSION: '3.9'              # set this to the Python version to use
 
 on:
   push:
@@ -77,10 +77,20 @@ jobs:
         with:
           name: python-app
           path: .
+          
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D4D045571E7845F780ACAA655E66CD2E }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5CCFFC449D2F48C9848901313FDB5664 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0DA2A38E7291452AB37D88B1710066C6 }}
+
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
+        app-name: 'app-monitorprod'
+          slot-name: 'Production'
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
