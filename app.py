@@ -274,5 +274,5 @@ scheduler.add_job(check_email, 'interval', minutes=email_check_time)
 
 if __name__ == '__main__':
    app.run(debug=True)
-   app.run(port=8000)
+   app.run(port=5000)
 # function_app redeploy
