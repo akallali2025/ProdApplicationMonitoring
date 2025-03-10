@@ -231,7 +231,7 @@ initial_html = """
 """
 
 
-@app.route('/functional_app')
+@app.route('/')
 def index():
    print('Request for index page received')
    
@@ -239,7 +239,7 @@ def index():
    return render_template_string(initial_html)
 
 
-@app.route('/functional_app/update')
+@app.route('/update')
 def test_now():
     print("Test Now Button Clicked")
     new_html = update_html()
