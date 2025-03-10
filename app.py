@@ -82,7 +82,7 @@ class URLStatus:
                     "Connection": "keep-alive"
                 }
                 status_code = response.status_code
-                status = """<img src="images/green_light.jpg" alt="Green Light" width="20px"/>"""
+                status = """<img src="https://www.clipartkey.com/mpngs/m/39-390672_px-green-light-icon-green-traffic-lights-icon.png" alt="Green Light" width="20px"/>"""
                 status_color = "white"
                 
                 if (status_code == 200):
@@ -90,26 +90,26 @@ class URLStatus:
                     self.down_urls.pop(url, None)
                     self.emails_sent.pop(url, None)
                 else:
-                    status = """<img src="images/red_light.jpg" alt="Red Light" width="20px"/>"""
+                    status = """<img src="https://image.pngaaa.com/566/62566-middle.png" alt="Red Light" width="20px"/>"""
                     if url not in self.down_urls:
                         self.down_urls[url] = datetime.now(est_timezone)
                 
             except requests.exceptions.ConnectionError as e:
-                status = """<img src="images/red_light.jpg" alt="Red Light" width="20px"/>"""
+                status = """<img src="https://image.pngaaa.com/566/62566-middle.png" alt="Red Light" width="20px"/>"""
                 status_color = "white"
                 status_code = "N/A"
 
                 if url not in self.down_urls:
                     self.down_urls[url] = datetime.now(est_timezone)
             except requests.exceptions.Timeout as e:
-                status = """<img src="images/red_light.jpg" alt="Red Light" width="20px"/>"""
+                status = """<img src="https://image.pngaaa.com/566/62566-middle.png" alt="Red Light" width="20px"/>"""
                 status_color = "white"
                 status_code = e.response.status_code if e.response else "Timeout"
                 
                 if url not in self.down_urls:
                     self.down_urls[url] = datetime.now(est_timezone)
             except requests.exceptions.HTTPError as e:
-                status = """<img src="images/red_light.jpg" alt="Red Light" width="20px"/>"""
+                status = """<img src="https://image.pngaaa.com/566/62566-middle.png" alt="Red Light" width="20px"/>"""
                 status_color = "white"
                 status_code = e.response.status_code if e.response else "Timeout"
                 
