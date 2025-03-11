@@ -10,7 +10,7 @@ import pandas as pd
 import os
 
 
-from flask import (Flask, render_template_string, render_template)
+from flask import (Flask, render_template_string, render_template, send_from_directory, url_for)
 from apscheduler.schedulers.background import BackgroundScheduler
 
 current_dir = os.getcwd()
@@ -22,7 +22,7 @@ est_timezone = pytz.timezone('America/Toronto')
 # Environment Variables
 url_check_time = int(os.environ.get('URL_CHECK_TIME', 2))
 email_check_time = int(os.environ.get('EMAIL_CHECK_TIME', 3))
-refresh_url = os.environ.get('REFRESH_URL', "https://app-monitorprod.azurewebsites.net/")
+refresh_url = os.environ.get('REFRESH_URL', "https://monitoring-prod-apps.azurewebsites.net/")
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -82,8 +82,7 @@ class URLStatus:
                     "Connection": "keep-alive"
                 }
                 status_code = response.status_code
-                status = f"""
-                <img src="green_light.jpg" alt="Green Light" width="20px"/>
+                status = f""" <img src=""{{ url_for('static', filename='green_light.jpg') }}"" alt="Green Light" width="20px"/>
                 """
                 status_color = "white"
                 
@@ -93,14 +92,14 @@ class URLStatus:
                     self.emails_sent.pop(url, None)
                 else:
                     status = f"""
-                    <img src="red_light.jpg" alt="Red Light" width="20px"/>
+                    <img src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
                     """
                     if url not in self.down_urls:
                         self.down_urls[url] = datetime.now(est_timezone)
                 
             except requests.exceptions.ConnectionError as e:
                 status = f"""
-                <img src="red_light.jpg" alt="Red Light" width="20px"/>
+                <img src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
                 """
                 status_color = "white"
                 status_code = "N/A"
@@ -109,7 +108,7 @@ class URLStatus:
                     self.down_urls[url] = datetime.now(est_timezone)
             except requests.exceptions.Timeout as e:
                 status = f"""
-                <img src="red_light.jpg" alt="Red Light" width="20px"/>
+                <img src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
                 """
                 status_color = "white"
                 status_code = e.response.status_code if e.response else "Timeout"
@@ -118,7 +117,7 @@ class URLStatus:
                     self.down_urls[url] = datetime.now(est_timezone)
             except requests.exceptions.HTTPError as e:
                 status = f"""<img 
-                src="red_light.jpg" alt="Red Light" width="20px"/>
+                src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
                 """
                 status_color = "white"
                 status_code = e.response.status_code if e.response else "Timeout"
@@ -139,7 +138,7 @@ class URLStatus:
 
     def send_email_down(self, url):
         message_body = f"""The following site is down:<br><a href="{url}">{self.url_dict[url]}</a><br>
-        <p> Link to the Status of all other websites: <a href="https://app-monitorprod.azurewebsites.net/"> Server Status</a></p>
+        <p> Link to the Status of all other websites: <a href="https://monitoring-prod-apps.azurewebsites.net/"> Server Status</a></p>
         <p> Time of initial detection: {self.down_urls[url].strftime("%Y-%m-%d %H:%M:%S")}"""
         message = MIMEText(message_body, "html")
         message["Subject"] = "Site Down Notification"
@@ -174,7 +173,7 @@ def init_html():
     <meta http-equiv="refresh" content="{refresh_time}" />
 </head>
 <body>
-    <h1><img src="SSC_Logo.png" alt="SSC Logo" width="200px" height="200"/>Testing CIO Cloud Apps</h1>
+    <h1><img src="{{ url_for('static', filename='SSC_Logo.png') }}" alt="SSC Logo" width="200px" height="200"/>Testing CIO Cloud Apps</h1>
     """
 
 
@@ -240,11 +239,17 @@ initial_html = """
 </html>
 """
 
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
+
 
 @app.route('/')
 def index():
    print('Request for index page received')
-   
+   green_light_url = url_for('static', filename='green_light.jpg')
+  r_light_url = url_for('static', filename='green_light.jpg')
+   green_light_url = url_for('static', filename='green_light.jpg')
    global initial_html
    return render_template_string(initial_html)
 
