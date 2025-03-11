@@ -82,7 +82,7 @@ class URLStatus:
                     "Connection": "keep-alive"
                 }
                 status_code = response.status_code
-                status = f""" <img src=""{{ url_for('static', filename='green_light.jpg') }}"" alt="Green Light" width="20px"/>
+                status = """ <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 """
                 status_color = "white"
                 
@@ -92,14 +92,14 @@ class URLStatus:
                     self.emails_sent.pop(url, None)
                 else:
                     status = f"""
-                    <img src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
+                    <img src="./static/red_light.jpg" alt="Red Light" width="20px"/>
                     """
                     if url not in self.down_urls:
                         self.down_urls[url] = datetime.now(est_timezone)
                 
             except requests.exceptions.ConnectionError as e:
                 status = f"""
-                <img src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
+                <img src="./static/red_light.jpg" alt="Red Light" width="20px"/>
                 """
                 status_color = "white"
                 status_code = "N/A"
@@ -108,7 +108,7 @@ class URLStatus:
                     self.down_urls[url] = datetime.now(est_timezone)
             except requests.exceptions.Timeout as e:
                 status = f"""
-                <img src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
+                <img src="./static/red_light.jpg" alt="Red Light" width="20px"/>
                 """
                 status_color = "white"
                 status_code = e.response.status_code if e.response else "Timeout"
@@ -117,7 +117,7 @@ class URLStatus:
                     self.down_urls[url] = datetime.now(est_timezone)
             except requests.exceptions.HTTPError as e:
                 status = f"""<img 
-                src="{{ url_for('static', filename='red_light.jpg') }}" alt="Red Light" width="20px"/>
+                src="./static/red_light.jpg" alt="Red Light" width="20px"/>
                 """
                 status_color = "white"
                 status_code = e.response.status_code if e.response else "Timeout"
@@ -173,7 +173,7 @@ def init_html():
     <meta http-equiv="refresh" content="{refresh_time}" />
 </head>
 <body>
-    <h1><img src="{{ url_for('static', filename='SSC_Logo.png') }}" alt="SSC Logo" width="200px" height="200"/>Testing CIO Cloud Apps</h1>
+    <h1><img src="./static/SSC_Logo.png" alt="SSC Logo" width="200px" height="200"/>Testing CIO Cloud Apps</h1>
     """
 
 
@@ -247,9 +247,7 @@ def static_files(filename):
 @app.route('/')
 def index():
    print('Request for index page received')
-   green_light_url = url_for('static', filename='green_light.jpg')
-  r_light_url = url_for('static', filename='green_light.jpg')
-   green_light_url = url_for('static', filename='green_light.jpg')
+
    global initial_html
    return render_template_string(initial_html)
 
