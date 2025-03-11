@@ -173,7 +173,7 @@ def init_html():
     <meta http-equiv="refresh" content="{refresh_time}" />
 </head>
 <body>
-    <h1><img src="./static/SSC_Logo.png" alt="SSC Logo" width="200px" height="200"/>Testing CIO Cloud Apps</h1>
+    <h1><img src="./static/SSC_Logo.png" alt="SSC Logo" width="200px" height="100"/>Testing CIO Cloud Apps</h1>
     """
 
 
@@ -234,7 +234,7 @@ initial_html = """
 </head>
 <body>
     <h1>Testing CIO Cloud Apps</h1>
-    <h2>Still Initializing - The statuses will be updated shortly</h2>
+    <h2><img src="./static/SSC_Logo.png" alt="SSC Logo" width="200px" height="100"/>Still Initializing - The statuses will be updated shortly</h2>
 </body>
 </html>
 """
