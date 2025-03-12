@@ -38,7 +38,7 @@ class URLStatus:
         self.smtp_port = 587
         self.smtp_username = "AKIA4DJHEGSUFLYWCP6B"
         self.smtp_password = "BOas76+n7Cke7TErhAEX6zEyozoW0RvQtovn+kWGffoz"
-        self.email_from = "ssc.rsaarcher.donotreply-nepasrepondre.rsaarcher.ssc@ssc-spc.gc.ca"
+        self.email_from = "CIO-monitoring-app.donotreply-nepasrepondre.appli-surveillance_CIO@ssc-spc.gc.ca"
         self.email_to = "abdelmonaam.kallali@ssc-spc.gc.ca"
         self.current_time = ""
         self.html = """
@@ -169,7 +169,8 @@ def init_html():
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>App Monitor</title>
+    <title> App Monitor</title
+    <link rel="icon" href="./static/monitoring_title.jpeg" type="image/x-icon">>
     <meta http-equiv="refresh" content="{refresh_time}" />
 </head>
 <body>
@@ -231,6 +232,7 @@ initial_html = """
 <html lang="en">
 <head>
     <title>App Monitor</title>
+    <link rel="icon" href="./static/monitoring_title.jpeg" type="image/x-icon">
 </head>
 <body>
     <h1>Testing CIO Cloud Apps</h1>
