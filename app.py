@@ -266,7 +266,7 @@ def test_now():
 # Aim to send repeat emails after every hour
 # Send email if more hours than emails sent
 def check_email():
-    print("Check_email invoked")
+  #  print("Check_email invoked")
     down_dict = CheckStatus.down_urls
     sent_emails = CheckStatus.emails_sent
  
@@ -276,9 +276,9 @@ def check_email():
             time_diff = datetime.now(est_timezone) - down_dict[durl]
             hours = time_diff.total_seconds() // 3600
 
-            if (hours > (sent_emails[durl] - 1)):
+            if (hours > (sent_emails[durl] - 1) and datetime.datetime.today().weekday() < 5 and datetime.now(est_timezone).hour > 7 and datetime.now(est_timezone).hour < 18):
                 CheckStatus.send_email_down(durl)
-        else:
+        elif (datetime.datetime.today().weekday() < 5 and datetime.datetime.today().weekday() < 5 and datetime.now(est_timezone).hour > 7 and datetime.now(est_timezone).hour < 18):
             CheckStatus.send_email_down(durl)
 
 
