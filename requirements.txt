@@ -10,3 +10,10 @@ pandas
 openpyxl
 apscheduler
 flask
+app.db
+app.services.url_status
+smtplib
+pytz
+sqlite3
+datetime
+email.mime.text
