@@ -25,7 +25,7 @@ def create_app():
     """
     app = Flask(__name__)
     #TODO get rid of test variable change server name  
-    app.config['SERVER_NAME'] = 'localhost:5000'
+    app.config['SERVER_NAME'] = ''
     app.config['APPLICATION_ROOT'] = '\\'
 
     print("Initialize Database")
