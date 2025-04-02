@@ -11,7 +11,7 @@ openpyxl
 apscheduler
 flask
 app
-smtplib
 pytz
 sqlite3
 email
+smtplib
