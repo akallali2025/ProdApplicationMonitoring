@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>App Monitor - Status</title>
+    <meta http-equiv="refresh" content="{{ refresh_seconds }}" />
+    <link rel="icon" href="{{ url_for('static', filename='monitoring_title.jpeg') }}" type="image/x-icon">
+    <style>
+        header {
+            background: linear-gradient(to right, #4B0082, #8A2BE2);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .header-title img {
+            border-radius: 50%;
+            width: 80px; 
+            height: 80px; 
+            margin-right: 10px;
+        }
+        .global-settings-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5rem;
+            position: relative;
+            padding: 5px;
+        }
+        .global-settings-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Table styling */
+        #server-status-table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        #server-status-table th,
+        #server-status-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+        #server-status-table th {
+            background-color: #f2f2f2;
+        }
+
+        /* Buttons */
+        .action-button {
+            background-color: #6a5acd; /* A shade of purple */
+            color: #fff;
+            padding: 10px 16px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .action-button:hover {
+            background-color: #7b68ee; /* Slightly brighter on hover */
+        }
+        .buttons-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Modal overlay (shared for all modals) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        /* Generic modal content styling */
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 9px;
+            width: 40%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .close-btn {
+            float: right;
+            font-size: 1.2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin: -5px -5px 0 0;
+        }
+        .modal-form label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 5px;
+        }
+        .modal-form input,
+        .modal-form select {
+            width: 90%;
+            padding: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .modal-buttons {
+            text-align: right;
+        }
+        .save-settings,
+        .cancel-settings {
+            display: inline-block;
+            background-color: #6a5acd;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .save-settings:hover,
+        .cancel-settings:hover {
+            background-color: #7b68ee;
+        }
+        .cancel-settings {
+            background-color: #ccc;
+            color: #333;
+        }
+        .cancel-settings:hover {
+            background-color: #bbb;
+        }
+        .current-val {
+            color: #666;
+            font-weight: normal;
+            margin-left: 6px;
+            font-size: 0.95rem;
+        }
+
+        /* Little trash icon button */
+        .delete-email-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: 6px;
+            font-size: 1rem;
+            color: #888;
+        }
+        .delete-email-btn:hover {
+            color: red;
+        }
+
+        /* Container for each email (Edit mode) */
+        .wsEmailItem {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .wsEmailItem input[type="email"] {
+            flex: 1;
+        }
+
+        /* New style for the 'Settings' gear icon button */
+        .settings-button {
+            background-color: #6a5acd;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        .settings-button:hover {
+            background-color: #7b68ee;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER SECTION -->
+    <header>
+        <!-- TODO fix picture for SSC Logo  -->
+
+        <div class="header-title">
+            <img src="../static/SSC_Logo.png" alt="SSC Logo" />
+            <h2>Testing CIO Cloud Apps</h2>
+        </div>
+
+        <button class="global-settings-btn" id="globalSettingsBtn">&#9881;</button>
+    </header>
+
+    <!-- DYNAMIC TABLE (inserted via table_html) -->
+    <div>
+        {{ table_html|safe }}
+    </div>
+
+    <!-- Buttons below the table -->
+    <div class="buttons-container">
+        <button id="testNowBtn" class="action-button">Test Now</button>
+        <button id="addWebsiteBtn" class="action-button">Add Website</button>
+    </div>
+
+    <!-- MODAL: GLOBAL SETTINGS -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModalBtn">&times;</button>
+            <h2>Global Settings</h2>
+            <form class="modal-form" id="settingsForm">
+                {% set mute_all_text = 'True' if mute_all == 1 else 'False' %}
+
+                <label for="workStart">
+                    Work Hours Start
+                    <span class="current-val">(Current: {{ work_hours_start }})</span>
+                </label>
+                <input type="number" id="workStart" name="workStart"
+                       value="{{ work_hours_start }}" placeholder="e.g. 7"
+                       min="0" max="23" />
+
+                <label for="workEnd">
+                    Work Hours End
+                    <span class="current-val">(Current: {{ work_hours_end }})</span>
+                </label>
+                <input type="number" id="workEnd" name="workEnd"
+                       value="{{ work_hours_end }}" placeholder="e.g. 17"
+                       min="0" max="23" />
+
+                <label for="muteAll">
+                    Mute All
+                    <span class="current-val">(Current: {{ mute_all_text }})</span>
+                </label>
+                <select id="muteAll" name="muteAll">
+                    <option value="0" {% if mute_all == 0 %}selected{% endif %}>False</option>
+                    <option value="1" {% if mute_all == 1 %}selected{% endif %}>True</option>
+                </select>
+
+                <div class="modal-buttons">
+                    <button type="button" class="cancel-settings" id="cancelSettingsBtn">Cancel</button>
+                    <button type="button" class="save-settings" id="saveSettingsBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT AN EXISTING WEBSITE -->
+    <div class="modal-overlay" id="websiteSettingsModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeWebsiteSettingsBtn">&times;</button>
+            <h2>Website Settings</h2>
+            <form class="modal-form" id="websiteSettingsForm">
+                <!-- Hidden field for website ID -->
+                <input type="hidden" id="wsWebsiteId" name="wsWebsiteId" />
+
+                <label for="wsUrl">Website URL</label>
+                <input type="text" id="wsUrl" name="wsUrl" />
+
+                <label for="wsName">Website Name</label>
+                <input type="text" id="wsName" name="wsName" />
+
+                <label>Notification Emails</label>
+                <!-- Container for multiple email inputs (Edit modal) -->
+                <div id="wsEmailsContainer"></div>
+                <!-- "Add Another Email" button for the Edit modal -->
+                <button type="button" id="wsAddEmailBtn">Add Another Email</button>
+
+                <label for="wsActive">Active</label>
+                <select id="wsActive" name="wsActive">
+                    <option value="0">False</option>
+                    <option value="1">True</option>
+                </select>
+
+                <label for="wsDelete">Delete Website</label>
+                <select id="wsDelete" name="wsDelete">
+                    <option value="0">False</option>
+                    <option value="1">True</option>
+                </select>
+
+                <div class="modal-buttons">
+                    <button type="button" class="cancel-settings" id="cancelWebsiteSettingsBtn">Cancel</button>
+                    <button type="button" class="save-settings" id="saveWebsiteSettingsBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD A NEW WEBSITE -->
+    <div class="modal-overlay" id="addWebsiteModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeAddWebsiteBtn">&times;</button>
+            <h2>Add Website</h2>
+            <form class="modal-form" id="addWebsiteForm">
+                
+                <label for="newUrl">Website URL</label>
+                <input 
+                  type="text" 
+                  id="newUrl" 
+                  name="newUrl" 
+                  placeholder="e.g. https://example.com" 
+                />
+      
+                <label for="newName">Website Name</label>
+                <input 
+                  type="text" 
+                  id="newName" 
+                  name="newName" 
+                  placeholder="e.g. Example Homepage" 
+                />
+      
+                <label>Notification Emails</label>
+                <!-- Container to hold email fields for "Add" -->
+                <div id="emailFields">
+                  <input 
+                    type="email" 
+                    name="emails[]" 
+                    placeholder="e.g. user1@example.com" 
+                    required
+                  />
+                </div>
+                <!-- Button to add additional email fields -->
+                <button type="button" id="addEmailBtn">Add Another Email</button>
+      
+                <div class="modal-buttons">
+                    <button type="button" class="cancel-settings" id="cancelAddWebsiteBtn">Cancel</button>
+                    <button type="button" class="save-settings" id="saveAddWebsiteBtn">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS: Add Another Email (Add Website) -->
+    <script>
+        // Adds a new email <input> to the "Add Website" modal
+        document.getElementById('addEmailBtn').addEventListener('click', function() {
+            const container = document.getElementById('emailFields');
+            const newEmailField = document.createElement('input');
+            newEmailField.type = 'email';
+            newEmailField.name = 'emails[]';
+            newEmailField.placeholder = 'Enter another email';
+            newEmailField.required = true;
+            container.appendChild(newEmailField);
+        });
+    </script>
+
+    <!-- JS: Main Logic -->
+    <script>
+        /*************************************************
+         * HELPER: "EDIT WEBSITE" - Add Another Email Field
+         *************************************************/
+        function createWsEmailItem(value, websiteId) {
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("wsEmailItem");
+
+            // Email input
+            const input = document.createElement("input");
+            input.type = "email";
+            input.classList.add("wsEmailField");
+            input.placeholder = "e.g. user@example.com";
+            input.value = value;
+            wrapper.appendChild(input);
+
+            // Trash button
+            const delBtn = document.createElement("button");
+            delBtn.type = "button";
+            delBtn.classList.add("delete-email-btn");
+            delBtn.innerHTML = "&#128465;"; // trash can
+            delBtn.title = "Delete this email immediately";
+            wrapper.appendChild(delBtn);
+
+            // Delete single email from DB & DOM
+            delBtn.addEventListener("click", function() {
+                const emailVal = input.value.trim();
+                if (!emailVal || !websiteId) {
+                    // If no email or missing website ID, just remove from DOM
+                    wrapper.remove();
+                    return;
+                }
+                if (!confirm(`Are you sure you want to delete ${emailVal}?`)) {
+                    return;
+                }
+
+                // Attempt to delete from the DB
+                fetch(`/websites/${websiteId}/email/delete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: emailVal })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        wrapper.remove();
+                        alert(data.message || `Email deleted: ${emailVal}`);
+                    } else {
+                        alert("Delete error: " + (data.message || "Unknown error"));
+                    }
+                })
+                .catch(err => {
+                    console.error("Error deleting email:", err);
+                    alert("Failed to delete email.");
+                });
+            });
+
+            return wrapper;
+        }
+
+        function addWsEmailField(value = "", websiteId = "") {
+            const container = document.getElementById("wsEmailsContainer");
+            const emailItem = createWsEmailItem(value, websiteId);
+            container.appendChild(emailItem);
+        }
+
+        // "Add Another Email" in the Edit modal
+        document.getElementById("wsAddEmailBtn").addEventListener("click", function() {
+            const wsId = document.getElementById("wsWebsiteId").value;
+            addWsEmailField("", wsId);
+        });
+
+        /*************************************************
+         * 1) TEST NOW BUTTON
+         *************************************************/
+        document.getElementById("testNowBtn").addEventListener("click", function() {
+            window.location.href = "/websites/status";
+        });
+
+        /*************************************************
+         * 2) OPEN & CLOSE WEBSITE SETTINGS (EDIT)
+         *************************************************/
+        // Instead of "Settings" text in your table, you can show the gear icon by
+        // giving that button a class like "settings-button" or similar.
+
+        document.addEventListener("click", function(e) {
+            // If the gear icon button is clicked
+            if (e.target && e.target.matches("button.site-settings-btn")) {
+                const websiteId = e.target.getAttribute("data-website-id");
+                openWebsiteSettingsModal(websiteId);
+            }
+        });
+
+        function openWebsiteSettingsModal(websiteId) {
+            fetch(`/websites/${websiteId}/info`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("wsWebsiteId").value = data.website_id;
+                    document.getElementById("wsUrl").value = data.url;
+                    document.getElementById("wsName").value = data.name;
+                    document.getElementById("wsActive").value = data.active;
+
+                    // Always reset "Delete" to "False"
+                    document.getElementById("wsDelete").value = "0";
+
+                    // Clear existing email inputs
+                    const emailsContainer = document.getElementById("wsEmailsContainer");
+                    emailsContainer.innerHTML = "";
+
+                    if (Array.isArray(data.emails) && data.emails.length > 0) {
+                        data.emails.forEach(email => {
+                            addWsEmailField(email, data.website_id);
+                        });
+                    } else {
+                        addWsEmailField("", data.website_id);
+                    }
+
+                    // Show the modal
+                    document.getElementById("websiteSettingsModal").style.display = "flex";
+                } else {
+                    alert("Error fetching site info: " + (data.message || "Unknown error"));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to fetch website info.");
+            });
+        }
+
+        const websiteSettingsModal = document.getElementById("websiteSettingsModal");
+        const closeWebsiteSettingsBtn = document.getElementById("closeWebsiteSettingsBtn");
+        const cancelWebsiteSettingsBtn = document.getElementById("cancelWebsiteSettingsBtn");
+
+        function closeWebsiteSettingsModal() {
+            websiteSettingsModal.style.display = "none";
+        }
+        closeWebsiteSettingsBtn.addEventListener("click", closeWebsiteSettingsModal);
+        cancelWebsiteSettingsBtn.addEventListener("click", closeWebsiteSettingsModal);
+
+        // Close modal if user clicks outside
+        window.addEventListener("click", function(e) {
+            if (e.target === websiteSettingsModal) {
+                closeWebsiteSettingsModal();
+            }
+        });
+
+        /*************************************************
+         * 3) SAVE WEBSITE SETTINGS (EDIT)
+         *************************************************/
+        const saveWebsiteSettingsBtn = document.getElementById("saveWebsiteSettingsBtn");
+        saveWebsiteSettingsBtn.addEventListener("click", function() {
+            const websiteId = document.getElementById("wsWebsiteId").value;
+            const urlVal = document.getElementById("wsUrl").value.trim();
+            const nameVal = document.getElementById("wsName").value.trim();
+            const activeVal = document.getElementById("wsActive").value;
+            const deleteVal = document.getElementById("wsDelete").value; // "0" or "1"
+
+            // If wsDelete is "True," confirm then delete
+            if (deleteVal === "1") {
+                const confirmMsg = `Are you sure you want to DELETE this entire website?`;
+                if (!confirm(confirmMsg)) {
+                    return;
+                }
+                // Attempt to delete
+                fetch(`/websites/${websiteId}/delete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message || "Website deleted.");
+                        closeWebsiteSettingsModal();
+                        window.location.reload();
+                    } else {
+                        alert("Delete error: " + (data.message || "Unknown error"));
+                    }
+                })
+                .catch(err => {
+                    console.error("Error deleting website:", err);
+                    alert("Failed to delete website.");
+                });
+                return;
+            }
+
+            // Normal update path
+            const emailInputs = document.querySelectorAll(".wsEmailField");
+            const emailsVal = Array.from(emailInputs)
+                .map(i => i.value.trim())
+                .filter(e => e !== "");
+
+            fetch(`/websites/${websiteId}/update`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    url: urlVal,
+                    name: nameVal,
+                    emails: emailsVal,
+                    active: activeVal
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || "Website updated successfully!");
+                    closeWebsiteSettingsModal();
+                    window.location.reload();
+                } else {
+                    alert("Update error: " + (data.message || "Unknown"));
+                }
+            })
+            .catch(err => {
+                console.error("Error updating website:", err);
+                alert("Failed to update website.");
+            });
+        });
+
+        /*************************************************
+         * 4) OPEN & CLOSE "ADD WEBSITE" MODAL
+         *************************************************/
+        const addWebsiteBtn = document.getElementById("addWebsiteBtn");
+        const addWebsiteModal = document.getElementById("addWebsiteModal");
+        const closeAddWebsiteBtn = document.getElementById("closeAddWebsiteBtn");
+        const cancelAddWebsiteBtn = document.getElementById("cancelAddWebsiteBtn");
+
+        addWebsiteBtn.addEventListener("click", openAddWebsiteModal);
+
+        function openAddWebsiteModal() {
+            document.getElementById("newUrl").value = "";
+            document.getElementById("newName").value = "";
+
+            const container = document.getElementById("emailFields");
+            container.innerHTML = "";
+            const initialEmail = document.createElement("input");
+            initialEmail.type = "email";
+            initialEmail.name = "emails[]";
+            initialEmail.placeholder = "e.g. user1@example.com";
+            initialEmail.required = true;
+            container.appendChild(initialEmail);
+
+            addWebsiteModal.style.display = "flex";
+        }
+
+        function closeAddWebsiteModal() {
+            addWebsiteModal.style.display = "none";
+        }
+
+        closeAddWebsiteBtn.addEventListener("click", closeAddWebsiteModal);
+        cancelAddWebsiteBtn.addEventListener("click", closeAddWebsiteModal);
+
+        window.addEventListener("click", function(e) {
+            if (e.target === addWebsiteModal) {
+                closeAddWebsiteModal();
+            }
+        });
+
+        /*************************************************
+         * 5) SAVE NEW WEBSITE
+         *************************************************/
+        const saveAddWebsiteBtn = document.getElementById("saveAddWebsiteBtn");
+        saveAddWebsiteBtn.addEventListener("click", function() {
+            const urlVal = document.getElementById("newUrl").value.trim();
+            const nameVal = document.getElementById("newName").value.trim();
+
+            const emailInputs = document.querySelectorAll("#emailFields input[type='email']");
+            const emailsVal = Array.from(emailInputs)
+                .map(i => i.value.trim())
+                .filter(e => e !== "");
+
+            // Basic URL validation
+            if (!urlVal.startsWith("http://") && !urlVal.startsWith("https://")) {
+                alert("Please enter a valid URL (must start with http:// or https://).");
+                return;
+            }
+
+            fetch("/websites/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    url: urlVal,
+                    name: nameVal,
+                    emails: emailsVal
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || "Website added successfully!");
+                    closeAddWebsiteModal();
+                    window.location.reload();
+                } else {
+                    alert("Error: " + (data.message || "Could not add website."));
+                }
+            })
+            .catch(err => {
+                console.error("Error adding website:", err);
+                alert("Failed to add website.");
+            });
+        });
+
+        /*************************************************
+         * 6) GLOBAL SETTINGS MODAL
+         *************************************************/
+        const globalSettingsBtn = document.getElementById("globalSettingsBtn");
+        const settingsModal = document.getElementById("settingsModal");
+        const closeModalBtn = document.getElementById("closeModalBtn");
+        const cancelSettingsBtn = document.getElementById("cancelSettingsBtn");
+        const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+
+        globalSettingsBtn.addEventListener("click", function() {
+            settingsModal.style.display = "flex";
+        });
+        function closeSettingsModal() {
+            settingsModal.style.display = "none";
+        }
+        closeModalBtn.addEventListener("click", closeSettingsModal);
+        cancelSettingsBtn.addEventListener("click", closeSettingsModal);
+
+        window.addEventListener("click", function(e) {
+            if (e.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+
+        saveSettingsBtn.addEventListener("click", function() {
+            const startVal = document.getElementById("workStart").value;
+            const endVal = document.getElementById("workEnd").value;
+            const muteVal = document.getElementById("muteAll").value;
+
+            fetch("/websites/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    workStart: startVal,
+                    workEnd: endVal,
+                    muteAll: muteVal
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || "Config saved successfully!");
+                    closeSettingsModal();
+                    window.location.reload();
+                } else {
+                    alert("Error: " + JSON.stringify(data));
+                }
+            })
+            .catch(err => {
+                console.error("Error saving config:", err);
+                alert("Failed to save config.");
+            });
+        });
+
+        // Auto-refresh
+        // TODO refresh is not working correctly, only refresh whole page when user is not in modal 
+        // setInterval(function() {
+        //     location.reload();
+        // }, {{ refresh_ms }});
+    </script>
+
+</body>
+</html>

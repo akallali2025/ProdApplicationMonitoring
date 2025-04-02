@@ -1,0 +1,400 @@
+
+"""
+app/routes/main_routes.py
+--------------------------
+
+"""
+
+import os
+from flask import Blueprint, render_template_string, send_from_directory, render_template
+
+# Import the variables/functions from your service
+from app.services.url_status import initial_html, update_html
+
+# Create a Blueprint named 'main_bp'
+main_bp = Blueprint("main_bp", __name__)
+
+@main_bp.route('/static/<path:filename>')
+def static_files(filename):
+    """
+    This route serves static files (images, CSS, etc.) from the ./app/static folder.
+    """
+    return send_from_directory(os.path.join("app", "static"), filename)
+
+@main_bp.route('/')
+def index():
+    """
+    Returns the initial HTML (which might get replaced/refreshed shortly).
+    `initial_html` is defined in url_status.py (for now).
+    """
+    new_html = update_html()
+    return new_html
+
+@main_bp.route('/update')
+def test_now():
+    """
+    Manual trigger to immediately test URLs and refresh the HTML.
+    """
+    new_html = update_html()
+    # return new_html
+    return render_template("status.html")
+# def trigger_update():
+
+
+# from flask import (Blueprint, request, redirect, url_for, render_template_string, render_template)
+# import pandas as pd
+# import os
+# import requests
+# import urllib3.exceptions
+# #from atlassian import Confluence
+# from datetime import datetime
+# import pytz
+# import smtplib
+# from email.mime.text import MIMEText
+# import subprocess
+# import pandas as pd
+# import os
+
+
+# from flask import (Flask, render_template_string, render_template, send_from_directory, url_for, request,redirect, Blueprint)
+# from apscheduler.schedulers.background import BackgroundScheduler
+
+# current_dir = os.getcwd()
+# scheduler = BackgroundScheduler()
+# scheduler.start()
+# est_timezone = pytz.timezone('America/Toronto')
+
+# # Environment Variables
+# url_check_time = int(os.environ.get('URL_CHECK_TIME', 2))
+# email_check_time = int(os.environ.get('EMAIL_CHECK_TIME', 3))
+# refresh_url = os.environ.get('REFRESH_URL', "https://monitoring-prod-apps.azurewebsites.net/")
+
+# urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+# main_bp = Blueprint("main_bp", __name__)
+
+# class URLStatus:
+
+#     def __init__(self, url_file_path):
+#         print("testing __init__ on route ")
+#         self.url_file_path = url_file_path
+#         self.down_urls = {} # Key: url, Value: time
+#         self.email_dict = {} # Key: url, Value: email
+#         self.emails_sent = {} # Key: url, Value: number of emails sent
+#         self.url_dict = self.excel_to_dict()
+#         self.smtp_server = "email-smtp.ca-central-1.amazonaws.com"
+#         self.smtp_port = 587
+#         self.smtp_username = "AKIA4DJHEGSUFLYWCP6B"
+#         self.smtp_password = "BOas76+n7Cke7TErhAEX6zEyozoW0RvQtovn+kWGffoz"
+#         self.email_from = "ssc.rsaarcher.donotreply-nepasrepondre.rsaarcher.ssc@ssc-spc.gc.ca"
+#         self.email_to = "abdelmonaam.kallali@ssc-spc.gc.ca"
+#         self.current_time = ""
+#         self.html = """
+#     <table id="server-status-table" style="border-collapse: collapse;">
+#         <tr>
+#             <th style="border: 1px solid black; padding: 5px; cursor: pointer;">URL</th>
+#             <th style="border: 1px solid black; padding: 5px;text-align:center;">Status</th>
+#             <th style="border: 1px solid black; padding: 5px;text-align:center;">Status Code</th>
+#             <th style="border: 1px solid black; padding: 5px;text-align:center;">Last Tested</th>
+#         </tr>
+# """
+
+# #TODO 
+# #reorg eveything 
+# #add delete and pause button on scanning 
+# #add a mute notifications (Mute all and mute selected one)
+# #be able to open and modify a file inside the application 
+
+
+#     def excel_to_dict(self):
+#         df = pd.read_excel(self.url_file_path, header=1, names=["URL", "Website", "Email"]) #Load the Excel file into a pandas DataFrame
+#         #df = df.iloc[1:]# Remove the first row (Header)
+#         df = df.dropna()# skip if blank space
+#         #print(df)
+#         my_dict = dict(zip(df["URL"], df["Website"]))#combine the two column with the zip function to create a dict
+#         self.email_dict = dict(zip(df["URL"], df["Email"]))#combine the two column with the zip function to create a dict
+#         return my_dict
+    
+
+#     def test_urls(self):
+
+#         #Adding for testing purposes 
+#         self.url_dict = self.excel_to_dict()
+
+#         self.html = """
+#     <table id="server-status-table" style="border-collapse: collapse;">
+#         <tr>
+#             <th style="border: 1px solid black; padding: 5px; cursor: pointer;">URL</th>
+#             <th style="border: 1px solid black; padding: 5px;text-align:center;">Status</th>
+#             <th style="border: 1px solid black; padding: 5px;text-align:center;">Status Code</th>
+#             <th style="border: 1px solid black; padding: 5px;text-align:center;">Last Tested</th>
+#             <th style="border: 1px solid black; padding: 5px;text-align:center;">Modify</th>
+#         </tr>
+# """
+
+#         for url in self.url_dict: # For all url in the dictionary
+#             try:
+#                 response = requests.get(url, verify=False, timeout=5)
+#                 headers = {
+#                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0",
+#                     "Accept-Encoding": "*",
+#                     "Connection": "keep-alive"
+#                 }
+#                 status_code = response.status_code
+#                 status = """ <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
+#                 """
+#                 status_color = "white"
+                
+#                 if (status_code == 200):
+#                     # Clean up
+#                     self.down_urls.pop(url, None)
+#                     self.emails_sent.pop(url, None)
+#                 else:
+#                     status = f"""
+#                     <img src="./static/red_light.jpg" alt="Red Light" width="20px"/>
+#                     """
+#                     if url not in self.down_urls:
+#                         self.down_urls[url] = datetime.now(est_timezone)
+                
+#             except requests.exceptions.ConnectionError as e:
+#                 status = f"""
+#                 <img src="./static/red_light.jpg" alt="Red Light" width="20px"/>
+#                 """
+#                 status_color = "white"
+#                 status_code = "N/A"
+
+#                 if url not in self.down_urls:
+#                     self.down_urls[url] = datetime.now(est_timezone)
+#             except requests.exceptions.Timeout as e:
+#                 status = f"""
+#                 <img src="./static/red_light.jpg" alt="Red Light" width="20px"/>
+#                 """
+#                 status_color = "white"
+#                 status_code = e.response.status_code if e.response else "Timeout"
+                
+#                 if url not in self.down_urls:
+#                     self.down_urls[url] = datetime.now(est_timezone)
+#             except requests.exceptions.HTTPError as e:
+#                 status = f"""<img 
+#                 src="./static/red_light.jpg" alt="Red Light" width="20px"/>
+#                 """
+#                 status_color = "white"
+#                 status_code = e.response.status_code if e.response else "Timeout"
+                
+#                 if url not in self.down_urls:
+#                     self.down_urls[url] = datetime.now(est_timezone)
+
+#             custom_url = self.url_dict.get(url, url)
+#             self.current_time = datetime.now(est_timezone).strftime("%Y-%m-%d %H:%M:%S")
+#             self.html += f"""
+#         <tr>
+#             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='{url}'>{custom_url}</a></td>
+#             <td style='border: 1px solid black; padding: 5px; background-color:{status_color}; color:black;text-align:center;'>{status}</td>
+#             <td style='border: 1px solid black; padding: 5px; text-align:center;'>{status_code}</td><td style='border: 1px solid black; padding: 5px;'>{self.current_time}</td>
+#         </tr>\n""" #Format the html to add the status, picture, date and the urls as link
+#         self.html += "  </table>" # end the html formatting
+
+
+#     def send_email_down(self, url):
+#         message_body = f"""The following site is down:<br><a href="{url}">{self.url_dict[url]}</a><br>
+#         <p> Link to the Status of all other websites: <a href="https://monitoring-prod-apps.azurewebsites.net/"> Server Status</a></p>
+#         <p> Time of initial detection: {self.down_urls[url].strftime("%Y-%m-%d %H:%M:%S")}"""
+#         message = MIMEText(message_body, "html")
+#         message["Subject"] = "Site Down Notification"
+#         message["From"] = self.email_from
+#         message["To"] = self.email_dict[url]
+#         with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+#             server.starttls()
+#             server.login(self.smtp_username, self.smtp_password)
+#             # server.sendmail(self.email_from, self.email_dict[url].split(","), message.as_string())
+#             server.quit()
+
+#         # If emails were sent before, increment counter
+#         # Else, add it to the dictionary
+#         if (url in self.emails_sent):
+#             self.emails_sent[url] += 1
+#         else:
+#             self.emails_sent[url] = 1
+
+
+# # Initial HTML on deployment or restart
+# initial_html = """
+# <!DOCTYPE html>
+# <html lang="en">
+# <head>
+#     <title>App Monitor</title>
+#     <link rel="icon" href="./static/monitoring_title.jpeg" type="image/x-icon">
+# </head>
+# <body>
+#     <h1>Testing CIO Cloud Apps</h1>
+#     <h2><img src="./static/SSC_Logo.png" alt="SSC Logo" width="200px" height="100"/>Still Initializing - The statuses will be updated shortly</h2>
+# </body>
+# </html>
+# """
+
+# # @main_bp.route('/static/<path:filename>')
+# # def static_files(filename):
+# #     return send_from_directory('static', filename)
+
+
+# @main_bp.route('/')
+# def index():
+#    print('Request for index page received')
+
+#    global initial_html
+#    return render_template_string(initial_html)
+
+
+# @main_bp.route('/update')
+# def test_now():
+#     print("Test Now Button Clicked")
+#     new_html = update_html()
+#     return new_html
+
+# @main_bp.route('/add_url', methods=["GET", "POST"])
+# def add_url():
+#     print("Adding URL")
+#     if request.method == "POST":
+#         # retrieve data 
+#         url_value     = request.form.get("url")
+#         website_value = request.form.get("website")
+#         email_value   = request.form.get("email")
+
+#         # read excel file 
+#         df = pd.read_excel("URL_List.xlsx")
+
+#         #add new row 
+#         new_row = {
+#             "URL": url_value,
+#             "Website": website_value,
+#             "Email": email_value
+#         }
+#         #add row and write to excel  
+#         new_row_df = pd.DataFrame([new_row])
+#         df = pd.concat([df, new_row_df], ignore_index=True)
+#         df.to_excel("URL_List.xlsx", index=False)
+
+#         #TODO 
+#         #Must check new URL, and email is valid. 
+#         #Add proper popup form instead of a new page 
+#         #add loading button while adding website 
+
+#         # return 
+#         return redirect('/update')
+    
+#     else:
+#         #Display Form 
+#         return render_template_string('''
+#             <h2>Add New Website</h2>
+#             <form method="POST">
+#                 <label for="url">URL:</label><br>
+#                 <input type"text" id="url" name="url" required><br><br>
+                                      
+#                 <label for="website">Website:</label><br>
+#                 <input type"text" id="website" name="website" required><br><br>
+                                      
+#                 <label for="email">Email:</label><br>
+#                 <input type"text" id="email" name="email" required><br><br>
+                                      
+#                 <button type="submit">Submit</button>
+#             </form>
+
+#         ''')
+
+# CheckStatus = URLStatus("Url_List.xlsx")
+
+# # Test URLs & Update HTML
+# def update_html():
+#     print("HTML update called")
+#     global initial_html
+#     CheckStatus.test_urls()
+#     init_html()
+#     initial_html += CheckStatus.html
+#     # WRITE TO PAGE TO SEE HOW SCRIPT IS APPENDED
+#     # TEST WITH EMULATOR
+#     # DOUBLE CHECK SYNTAX "location." or "window.location"
+#     refresh_time = (60000 * url_check_time) + 60000
+#     initial_html += """
+#     <button id="testButton">Test Now</button>
+
+#     <a href="{{ url_for('main_bp.add_url') }}">
+#         <button>Add Website</button>
+#     </a>
+
+#     <script>
+#         document.getElementById("testButton").addEventListener("click", function() {
+#             document.getElementById("testButton").disabled = true;
+
+#             var xhr = new XMLHttpRequest();
+#             xhr.open("GET", "/update", true);
+#             xhr.onreadystatechange = function() {
+#                 if (xhr.readyState == 4 && xhr.status == 200) {
+#                     document.documentElement.innerHTML = xhr.responseText;
+
+#                     setTimeout(function() {
+#                         document.getElementById("testButton").disabled = false;
+#                     }, 60000);
+#                 }
+#             };
+#             xhr.send();
+#         });
+
+#         setInterval(function() {
+#             location.reload();
+#         },"""
+#     initial_html += f""" {refresh_time});"""
+#     initial_html += """
+#     </script>
+# </body>
+# </html>
+#     """
+#     current_dir = os.getcwd()
+#     with open('index.html', 'w') as file:
+#         file.write(initial_html)
+#    # print(initial_html)
+#     return initial_html
+
+
+# # Set up initial html
+# def init_html():
+#     print("testing init_html")
+#     refresh_time = (60 * url_check_time) + 40
+#     global initial_html
+#     initial_html = f"""
+# <!DOCTYPE html>
+# <html lang="en">
+# <head>
+#     <title>App Monitor</title>
+#     <link rel="icon" href="./static/monitoring_title.jpeg" type="image/x-icon">
+#     <meta http-equiv="refresh" content="{refresh_time}" />
+# </head>
+# <body>
+#     <h1><img src="./static/SSC_Logo.png" alt="SSC Logo" width="200px" height="100"/>Testing CIO Cloud Apps</h1>
+#     """
+
+
+# # Check urls that have been marked as down
+# # Check how many emails have been sent and compare it to how many hours have passed
+# # Aim to send repeat emails after every hour
+# # Send email if more hours than emails sent
+# def check_email():
+#     print("Check_email invoked")
+#     down_dict = CheckStatus.down_urls
+#     sent_emails = CheckStatus.emails_sent
+ 
+#     for durl in down_dict:
+#         print(durl)
+#         if durl in sent_emails:
+#             time_diff = datetime.now(est_timezone) - down_dict[durl]
+#             hours = time_diff.total_seconds() // 3600
+
+#             if (hours > (sent_emails[durl] - 1)):
+#                 CheckStatus.send_email_down(durl)
+#         else:
+#             CheckStatus.send_email_down(durl)
+
+
+# # Schedule status checks and email updates
+# scheduler.add_job(update_html, 'interval', minutes=url_check_time)
+# scheduler.add_job(check_email, 'interval', minutes=email_check_time)

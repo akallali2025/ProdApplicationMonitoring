@@ -2,8 +2,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title> App Monitor</title
-    <link rel="icon" href="./static/monitoring_title.jpeg" type="image/x-icon">>
+    <title>App Monitor</title>
+    <link rel="icon" href="./static/monitoring_title.jpeg" type="image/x-icon">
+    <meta http-equiv="refresh" content="160" />
+</head>
+<body>
+    <h1><img src="./static/Logo.png" alt="Logo" width="200px" height="100"/>Testing IT</h1>
+    
+        <table id="server-status-table" style="border-collapse: collapse;">
+            <tr>
+                <th style="border: 1px solid black; padding: 5px; cursor: pointer;">URL</th>
+                <th style="border: 1px solid black; padding: 5px;text-align:center;">Status</th>
+                <th style="border: 1px solid black; padding: 5px;text-align:center;">Status Code</th>
+                <th style="border: 1px solid black; padding: 5px;text-align:center;">Last Tested</th>
+            </tr>
+        </table>
+    <button id="testButton">Test Now t</button>
+
+    <script>
+        document.getElementById("testButton").addEventListener("click", function() {
+            document.getElementById("testButton").disabled = true;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/update", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    document.documentElement.innerHTML = xhr.responseText;
+                    setTimeout(function() {
+                        document.getElementById("testButton").disabled = false;
+                    }, 60000);
+                }
+            };
+            xhr.send();
+        });
+
+        // Auto-refresh periodically
+        setInterval(function() {
+            location.reload();
+        }, 60000.0);
+    </script>
+</body>
+</html>
+    
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>App Monitor</title>
+    <link rel="icon" href="./static/monitoring_title.jpeg" type="image/x-icon">
     <meta http-equiv="refresh" content="160" />
 </head>
 <body>
@@ -15,94 +62,84 @@
             <th style="border: 1px solid black; padding: 5px;text-align:center;">Status</th>
             <th style="border: 1px solid black; padding: 5px;text-align:center;">Status Code</th>
             <th style="border: 1px solid black; padding: 5px;text-align:center;">Last Tested</th>
+            <th style="border: 1px solid black; padding: 5px;text-align:center;">Modify</th>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://archer-prod.ssc-spc.gc.ca'>Archer Prod</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:47</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:53</td>
         </tr>
 
         <tr>
-            <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://archer-dev.ssc-spc.gc.ca/RSAarcher'>Archer Dev</a></td>
+            <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://sscpp-ppspc-360-ent.crm3.dynamics.com/'>SSC360</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:47</td>
-        </tr>
-
-        <tr>
-            <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://sscpp-ppspc.crm3.dynamics.com/'>CIO CIRA</a></td>
-            <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
-                </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:47</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:53</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://plus.ssc-spc.gc.ca/en'>MySSC+</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:48</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:55</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://sscp2pspc.ssc-spc.gc.ca/'>P2P Prod</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:48</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:55</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://preprod-sscp2pspc.ssc-spc.gc.ca/page.aspx/fr/usr/login?ReturnUrl=%2fpage.aspx%2fen%2fbuy%2fhomepage'>P2P PreProd</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:50</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:55</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://Atip.ssc-spc.gc.ca/atipxpress'>ATIP</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:50</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:55</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://atippal.ssc-spc.gc.ca'>ATIPPAL</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:50</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:55</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://atip-uat.ssc-spc.gc.ca/atipxpress'>ATIP UAT</a></td>
-            <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'>
-                <img src="./static/red_light.jpg" alt="Red Light" width="20px"/>
-                </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>Timeout</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:56</td>
-        </tr>
-
-        <tr>
-            <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://atippal-uat.ssc-spc.gc.ca'>ATIPPAL UAT</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:56</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:56</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://bpc-pac.ssc-spc.gc.ca/'>FME-BPC</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:56</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:56</td>
         </tr>
 
         <tr>
             <td style='border: 1px solid black; padding: 5px; width: 60%;'><a href='https://esp-pse.ssc-spc.gc.ca/'>ESP</a></td>
             <td style='border: 1px solid black; padding: 5px; background-color:white; color:black;text-align:center;'> <img src="./static/green_light.jpg" alt="Green Light" width="20px"/>
                 </td>
-            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-12 09:31:57</td>
+            <td style='border: 1px solid black; padding: 5px; text-align:center;'>200</td><td style='border: 1px solid black; padding: 5px;'>2025-03-19 11:45:56</td>
         </tr>
   </table>
     <button id="testButton">Test Now</button>
+
+    <a href="{{ url_for('main_bp.add_url') }}">
+        <button>Add Website</button>
+    </a>
 
     <script>
         document.getElementById("testButton").addEventListener("click", function() {
@@ -128,4 +165,4 @@
     </script>
 </body>
 </html>
-    
+     -->
