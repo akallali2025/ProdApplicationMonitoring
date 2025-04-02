@@ -383,8 +383,8 @@ def update_html():
     refresh_secs = (60 * url_check_time) + 40
     refresh_ms = (url_check_time * 60000) + 60000
 
-    print(current_app.config['test_varaible'])
-    print("Testing variable!")
+
+
 
 
     return render_template(
