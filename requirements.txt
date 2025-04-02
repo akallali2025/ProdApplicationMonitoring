@@ -12,6 +12,6 @@ apscheduler
 flask
 app
 pytz
-sqlite3
 email
+sqlite3
 smtplib
