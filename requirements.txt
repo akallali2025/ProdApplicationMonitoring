@@ -10,8 +10,8 @@ pandas
 openpyxl
 apscheduler
 flask
-appsmtplib
+app
+smtplib
 pytz
 sqlite3
-datetime
 email
