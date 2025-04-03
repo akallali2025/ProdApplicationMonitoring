@@ -1,23 +1,17 @@
-# db.py
+
 """
 db.py
------
-Manages SQLite database initialization and connections.
 """
 
 import sqlite3
 import os
 
 def init_db(db_path="my_datebase.db", script_path="create_tables.sql"):
-    """
-    Ensures that required database tables exist. Reads SQL from the given script
-    and executes it within an SQLite connection to 'db_path'.
-    - If tables already exist (due to IF NOT EXISTS in your SQL), no changes are made.
-    - If they are missing, they get created.
 
-    :param db_path: Path (relative or absolute) to your SQLite database file.
-    :param script_path: Path to the SQL script file containing CREATE TABLE statements.
-    """
+    #check if db exists 
+    if os.path.exists(db_path):
+        return 
+
     # Ensure the SQL file exists
     if not os.path.isfile(script_path):
         raise FileNotFoundError(f"SQL script not found: {script_path}")
