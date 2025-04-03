@@ -12,4 +12,3 @@ apscheduler
 flask
 app
 pytz
-email
