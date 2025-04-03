@@ -177,7 +177,8 @@ class URLStatus:
 
         mute_all = self.config.get("mute_all")
 
-        for url, info in self.url_dict.items():
+        sorted_items = sorted(self.url_dict.items(), key=lambda item: item[1].get("name", "").strip().lower())
+        for url, info in sorted_items:
             site_name = info["name"] or url
             site_active = info["active"]
             wid = info["website_id"]
