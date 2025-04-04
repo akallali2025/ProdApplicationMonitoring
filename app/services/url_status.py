@@ -185,7 +185,7 @@ class URLStatus:
 
             # If MUTE_ALL or site is inactive => pause
             if mute_all == 1 or site_active == 0:
-                status_icon = "&#10073;&#10073;"  # pause
+                status_icon = """<img src="../static/inactive.jpg" alt="Inactive" style="width=100%; max-width:80px; height:auto;"/>"""
                 status_code = "--"
                 self.current_time = datetime.now(est_timezone).strftime("%Y-%m-%d %H:%M:%S")
 
