@@ -8,9 +8,9 @@ import os
 
 def init_db(db_path="my_database.db", script_path="create_tables.sql"):
 
-    #check if db exists -> test
-    # if os.path.exists(db_path):
-    #     return 
+    # check if db exists -> test
+    if os.path.exists(db_path):
+        return 
 
     # Ensure the SQL file exists
     if not os.path.isfile(script_path):
