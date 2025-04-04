@@ -29,7 +29,7 @@ def create_app():
     app.config['APPLICATION_ROOT'] = '\\'
 
     print("Initialize Database")
-    db_path = os.environ.get("DB_PATH", "mydatabase.db")
+    db_path = os.environ.get("DB_PATH", "my_database.db")
     init_db(db_path=db_path, script_path="create_tables.sql")
 
     #TODO insert database 
