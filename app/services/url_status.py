@@ -18,9 +18,6 @@ email_check_time = int(os.environ.get('EMAIL_CHECK_TIME', 3))
 
 refresh_url = os.environ.get('REFRESH_URL', "https://monitoring-prod-apps.azurewebsites.net/")
 
-
-
-
 class URLStatus:
     """
     Manages:
@@ -152,7 +149,7 @@ class URLStatus:
         conn.commit()
         conn.close()
 
-    #Test URL gets called every 2 min from the scheduled job 
+
     def test_urls(self):
         """
         1) Reload config + websites from DB,
@@ -176,7 +173,8 @@ class URLStatus:
         """
 
         mute_all = self.config.get("mute_all")
-
+        
+        #Sort order on table 
         sorted_items = sorted(self.url_dict.items(), key=lambda item: item[1].get("name", "").strip().lower())
         for url, info in sorted_items:
             site_name = info["name"] or url
@@ -185,7 +183,7 @@ class URLStatus:
 
             # If MUTE_ALL or site is inactive => pause
             if mute_all == 1 or site_active == 0:
-                status_icon = """<img src="../static/inactive.jpg" alt="Inactive" style="width=100%; max-width:80px; height:auto;"/>"""
+                status_icon = """<img src="../static/inactive.jpg" alt="Inactive" style="width=80%; max-width:80px; height:auto;"/>"""
                 status_code = "--"
                 self.current_time = datetime.now(est_timezone).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -216,7 +214,6 @@ class URLStatus:
                 continue
 
             # Site is active + not globally muted => do the HTTP check
-            #TODO call send_email down from here. check database first. 
             try:
                 resp = requests.get(url, verify=False, timeout=5)
                 status_code = resp.status_code
@@ -237,7 +234,7 @@ class URLStatus:
                     self.down_urls[url] = datetime.now(est_timezone)
             
             #update_last tested should be updateding database. 
-            self.update_last_tested(url)
+            # self.update_last_tested(url)
 
             self.current_time = datetime.now(est_timezone).strftime("%Y-%m-%d %H:%M:%S")
             self.html += f"""
@@ -267,23 +264,8 @@ class URLStatus:
         self.html += "</table>"
 
     def send_email_down(self, url):
-        """
-        Send a 'Site Down' email for the URL, but only if the current local hour is
-        within [work_hours_start, work_hours_end).
-        #TODO This is not getting grom db
-        #TODO if email is sent increase int on db for 'total_emails_sent' and ensure only 1 email sends per day
-        #TODO reset int every 24h
-        """
-        # conn = sqlite3.connect(self.db_path)
-        # cur = conn.cursor()
-        # cur.execute("""
-        #     SELECT work_hours_start, work_hours_end, mute_all
-        #     FROM config
-        #     LIMIT 1
-        # """)
-        # row = cur.fetchone()
-        # conn.close()
 
+        print("\nSend Email Down Invoked")
         now_local = datetime.now(est_timezone)
         current_h = now_local.hour
         start_h = self.config.get("work_hours_start")
@@ -316,13 +298,17 @@ class URLStatus:
         msg = MIMEText(msg_body, "html")
         msg["Subject"] = "Site Down Notification"
         msg["From"] = self.email_from
-        msg["To"] = all_emails[0]  # or use ", ".join(all_emails)
+        msg["To"] = ",".join(all_emails)
+
+        print("email debug")
+        print(" Subject: ", msg["Subject"])
+        print(" From: ", msg["From"])
+        print(" To: ", msg["To"], "\n")
 
         try:
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
                 server.starttls()
                 server.login(self.smtp_username, self.smtp_password)
-
                 server.sendmail(self.email_from, all_emails, msg.as_string())
                 server.quit()
             print(f"Email sent: {url} is down.")
@@ -330,7 +316,6 @@ class URLStatus:
             print(f"Email failed for {url}: {e}")
 
         # Track how many we've sent
-        #TODO track how many we have sent through db
         self.emails_sent[url] = self.emails_sent.get(url, 0) + 1
 
 
@@ -378,15 +363,9 @@ def update_html():
     """
     print("update_html called\n\n")
     CheckStatus.test_urls()
-    print("update_html called -> CheckStatus.test_urls called\n\n")
-
     table_html = CheckStatus.html
     refresh_secs = (60 * url_check_time) + 40
     refresh_ms = (url_check_time * 60000) + 60000
-
-
-
-
 
     return render_template(
         "status.html",
@@ -401,13 +380,19 @@ def check_email():
     Check any down URLs. If they've been down longer than X hours => send another email,
     provided it's during work hours.
     """
-    print("check_email invoked")
+    print("check_email invoked\n")
     now_local = datetime.now(est_timezone)
 
     for durl in CheckStatus.down_urls:
+        print("Down URLS: \n", durl)
+
         down_start = CheckStatus.down_urls[durl]
         hours_down = (now_local - down_start).total_seconds() / 3600.0
         emails_sent = CheckStatus.emails_sent.get(durl, 0)
+        print("down_start: ", down_start)
+        print("hours_down: ", hours_down)
+        print("emails_sent: ", emails_sent)
+        print("\n\n")
 
         if hours_down > emails_sent:
             CheckStatus.send_email_down(durl)
